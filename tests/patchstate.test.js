@@ -10,7 +10,7 @@ describe("Object tests", () => {
         four: 4
       }
     };
-    const newState = patchState(state, undefined, patch);
+    const newState = patchState(state, patch);
     expect(newState).toEqual({
       ...state,
       ...patch
@@ -26,7 +26,7 @@ describe("Object tests", () => {
         four: 4
       }
     };
-    const newState = patchState(state, { at: 1 }, patch);
+    const newState = patchState(state, patch, { at: 1 });
     expect(newState).toEqual({
       ...state,
       ...patch
@@ -42,7 +42,7 @@ describe("Object tests", () => {
         four: 4
       }
     };
-    const newState = patchState(state, undefined, patch);
+    const newState = patchState(state, patch);
     expect(newState !== state).toEqual(true);
   });
 });
@@ -57,7 +57,7 @@ describe("Array append tests", () => {
     const patch = [{
       three: 3
     }];
-    const newState = patchState(state, undefined, patch);
+    const newState = patchState(state, patch);
     expect(newState).toEqual([
       ...state,
       ...patch
@@ -73,7 +73,7 @@ describe("Array append tests", () => {
     const patch = [{
       three: 3
     }];
-    const newState = patchState(state, undefined, patch);
+    const newState = patchState(state, patch);
     expect(
       newState !== state &&
       newState[0] === state[0] &&
@@ -88,7 +88,7 @@ describe("Array append tests", () => {
     }, {
       two: 2
     }];
-    const newState = patchState(state, undefined, []);
+    const newState = patchState(state, []);
     expect(
       newState !== state
       && newState[0] === state[0]
@@ -108,7 +108,7 @@ describe("Array prepend tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { at: 0 }, patch);
+    const newState = patchState(state, patch, { at: 0 });
     expect(newState).toEqual([
       patch,
       ...state
@@ -124,7 +124,7 @@ describe("Array prepend tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { at: 0 }, patch);
+    const newState = patchState(state, patch, { at: 0 });
     expect(
       newState !== state &&
       newState[0] !== patch &&
@@ -139,7 +139,7 @@ describe("Array prepend tests", () => {
     }, {
       two: 2
     }];
-    const newState = patchState(state, { at: 0 }, []);
+    const newState = patchState(state, [], { at: 0 });
     expect(
       newState !== state
       && newState[0] === state[0]
@@ -159,7 +159,7 @@ describe("Array insert tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { at: 1 }, patch);
+    const newState = patchState(state, patch, { at: 1 });
     expect(newState).toEqual([{
       one: 1
     }, {
@@ -178,7 +178,7 @@ describe("Array insert tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { at: 1 }, patch);
+    const newState = patchState(state, patch, { at: 1 });
     expect(
       newState !== state &&
       newState[0] === state[0] &&
@@ -193,7 +193,7 @@ describe("Array insert tests", () => {
     }, {
       two: 2
     }];
-    const newState = patchState(state, { at: 1 }, []);
+    const newState = patchState(state, [], { at: 1 });
     expect(
       newState !== state
       && newState[0] === state[0]
@@ -217,7 +217,7 @@ describe("Array insert path tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { path: "path1.path2", at: 1 }, patch);
+    const newState = patchState(state, patch, { path: "path1.path2", at: 1 });
     expect(newState).toEqual({
       path1: {
         path2: [{
@@ -244,7 +244,7 @@ describe("Array insert path tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { path: "path1.path2", at: 5 }, patch);
+    const newState = patchState(state, patch, { path: "path1.path2", at: 5 });
     expect(newState).toEqual({
       path1: {
         path2: [{
@@ -271,7 +271,7 @@ describe("Array insert path tests", () => {
     const patch = {
       three: 3
     };
-    const newState = patchState(state, { path: "path1.path2", at: 1 }, patch);
+    const newState = patchState(state, patch, { path: "path1.path2", at: 1 });
     expect(
       newState !== state &&
       newState.path1 !== state.path1 &&
@@ -292,7 +292,7 @@ describe("Array insert path tests", () => {
         }]
       }
     };
-    const newState = patchState(state, { path: "path1.path2", at: 1 });
+    const newState = patchState(state, undefined, { path: "path1.path2", at: 1 });
     expect(
       newState === state &&
       newState.path1 === state.path1 &&
@@ -314,7 +314,7 @@ describe("Path creation tests", () => {
         five: 4
       }
     };
-    const newState = patchState(state, 'two.three', patch);
+    const newState = patchState(state, patch, 'two.three');
     expect(newState).toEqual({
       one: 1,
       two: {
@@ -336,7 +336,7 @@ describe("Path creation tests", () => {
         five: 4
       }
     };
-    const newState = patchState(state, 'two.0.three.1', patch);
+    const newState = patchState(state, patch, 'two.0.three.1');
     expect(newState).toEqual({
       one: 1,
       two: [
