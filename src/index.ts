@@ -2,12 +2,16 @@ import { ReduxAction, PatchStateOptions, BatchedReducerOptions } from "./interfa
 import { get, isString, isPlainObject, isUndefined, set, isNull } from "@kubric/litedash";
 
 export const composeReducers = (reducers: Array<Function> = [], defaultState: any): Function =>
-  (state: any = defaultState, action: ReduxAction = {}) => reducers.reduce((state: any, reducer: Function) => reducer(state, action), state);
+  (state: any = defaultState, action: ReduxAction = {}) =>
+    reducers.reduce((state: any, reducer: Function) => reducer(state, action), state);
 
-export const batchedActionReducer = (reducer: Function, {
-  type = "BATCHED_ACTION",
-  payload: payloadPath = "payload"
-}: BatchedReducerOptions = {}): Function =>
+export const batchedActionReducer = (
+  reducer: Function,
+  {
+    type = "BATCHED_ACTION",
+    payload: payloadPath = "payload"
+  }: BatchedReducerOptions = {}
+): Function =>
   (state: any, action: ReduxAction = {}) => {
     if(action.type === type) {
       let payload = get(action, payloadPath, []);
@@ -20,7 +24,11 @@ export const batchedActionReducer = (reducer: Function, {
     }
   };
 
-const patchByType = (src: string | Array<any> | object, dest?: string | Array<any> | object, at?: number | undefined) => {
+const patchByType = (
+  src: string | Array<any> | object,
+  dest?: string | Array<any> | object,
+  at?: number | undefined
+) => {
   const error = new Error(`source and destination types do not match`);
   const isDestUndefined = isUndefined(dest);
   const isAtUndefined = isUndefined(at);
@@ -67,7 +75,11 @@ const patchByType = (src: string | Array<any> | object, dest?: string | Array<an
   }
 };
 
-export const patchState = (state: any, options: PatchStateOptions | string = {}, patch: any) => {
+export const patchState = (
+  state: any,
+  options: PatchStateOptions | string = {},
+  patch: any
+) => {
   if(isString(options)) {
     options = {
       path: options
