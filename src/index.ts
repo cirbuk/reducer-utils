@@ -1,6 +1,8 @@
 import { ReduxAction, PatchStateOptions, BatchedReducerOptions } from "./interfaces";
 import { get, isString, isPlainObject, isUndefined, set, isNull } from "@kubric/litedash";
 
+export { default as combineReducers } from './combinereducers';
+
 /**
  * Accepts an array of reducers and a default state and returns a single reducer. Any incoming action to the final
  * reducer passes through all the reducers(from left to right). The state passed to a reducer will be the state
