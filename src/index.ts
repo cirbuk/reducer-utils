@@ -1,5 +1,6 @@
-import { ReduxAction, PatchStateOptions, BatchedReducerOptions } from "./interfaces";
+import { ReduxAction, PatchStateOptions, BatchedReducerOptions, AnyAction, Reducer } from "./interfaces";
 import { get, isString, isPlainObject, isUndefined, set, isNull } from "@kubric/litedash";
+import { ActionTypes } from "./combinereducers";
 
 export { default as combineReducers } from './combinereducers';
 
@@ -10,9 +11,9 @@ export { default as combineReducers } from './combinereducers';
  * @param reducers
  * @param defaultState
  */
-export const composeReducers = (reducers: Array<Function> = [], defaultState: any): Function =>
-  (state: any = defaultState, action: ReduxAction = {}) =>
-    reducers.reduce((state: any, reducer: Function) => reducer(state, action), state);
+export const composeReducers = (reducers: Array<Reducer<any>> = [], defaultState: any): Function =>
+  (state: any = defaultState, action: AnyAction = { type: ActionTypes.INIT }, ...extraArgs: any[]) =>
+    reducers.reduce((state: any, reducer: Reducer<any>) => reducer(state, action, ...extraArgs), state);
 
 /**
  * Accepts a reducer and returns a new reducer that is capable of handling a batch of actions and evaluating them in

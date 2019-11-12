@@ -49,3 +49,10 @@ export interface ReducersMapObject {
   [key: string]: Reducer<any>;
 }
 
+export interface CombineOptions {
+  ignoreNonReducerKeys?: boolean
+}
+
+export type NonReducerKeysCache = {
+  [index: string]: boolean
+}

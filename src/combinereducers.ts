@@ -1,7 +1,7 @@
 import { isFunction, isPlainObject, isUndefined } from '@kubric/litedash'
-import { AnyAction, ReducersMapObject } from "./interfaces";
+import { AnyAction, CombineOptions, ReducersMapObject, NonReducerKeysCache } from "./interfaces";
 
-const ActionTypes = {
+export const ActionTypes = {
   INIT: '@@redux/INIT'
 };
 
@@ -16,7 +16,7 @@ const getUndefinedStateErrorMessage = (key: string, action: AnyAction) => {
   )
 };
 
-const getUnexpectedStateShapeWarningMessage = (inputState: any, reducers: ReducersMapObject, action: AnyAction, unexpectedKeyCache: { [index: string]: any }) => {
+const getUnexpectedStateShapeWarningMessage = (inputState: any, reducers: ReducersMapObject, action: AnyAction, nonReducerKeysCache: NonReducerKeysCache) => {
   const reducerKeys = Object.keys(reducers);
   const argumentName = action && action.type === ActionTypes.INIT ?
     'preloadedState argument passed to createStore' :
@@ -39,19 +39,19 @@ const getUnexpectedStateShapeWarningMessage = (inputState: any, reducers: Reduce
     )
   }
 
-  const unexpectedKeys = Object.keys(inputState).filter(key =>
+  const nonReducerKeys = Object.keys(inputState).filter(key =>
     !reducers.hasOwnProperty(key) &&
-    !unexpectedKeyCache[key]
+    !nonReducerKeysCache[key]
   );
 
-  unexpectedKeys.forEach(key => {
-    unexpectedKeyCache[key] = true
+  nonReducerKeys.forEach(key => {
+    nonReducerKeysCache[key] = true
   });
 
-  if(unexpectedKeys.length > 0) {
+  if(nonReducerKeys.length > 0) {
     return (
-      `Unexpected ${unexpectedKeys.length > 1 ? 'keys' : 'key'} ` +
-      `"${unexpectedKeys.join('", "')}" found in ${argumentName}. ` +
+      `Unexpected ${nonReducerKeys.length > 1 ? 'keys' : 'key'} ` +
+      `"${nonReducerKeys.join('", "')}" found in ${argumentName}. ` +
       `Expected to find one of the known reducer keys instead: ` +
       `"${reducerKeys.join('", "')}". Unexpected keys will be ignored.`
     )
@@ -103,7 +103,9 @@ const assertReducerShape = (reducers: ReducersMapObject) => {
  * @returns {Function} A reducer function that invokes every reducer inside the
  * passed object, and builds a state object with the same shape.
  */
-export default (reducers: ReducersMapObject) => {
+export default (reducers: ReducersMapObject, {
+  ignoreNonReducerKeys
+}: CombineOptions = { ignoreNonReducerKeys: false }) => {
   const reducerKeys = Object.keys(reducers);
   const finalReducers: ReducersMapObject = {};
   for(let i = 0; i < reducerKeys.length; i++) {
@@ -121,9 +123,9 @@ export default (reducers: ReducersMapObject) => {
   }
   const finalReducerKeys = Object.keys(finalReducers);
 
-  let unexpectedKeyCache: object;
+  let nonReducerKeysCache: NonReducerKeysCache;
   if(process.env.NODE_ENV !== 'production') {
-    unexpectedKeyCache = {}
+    nonReducerKeysCache = {}
   }
 
   let shapeAssertionError: Error;
@@ -139,8 +141,8 @@ export default (reducers: ReducersMapObject) => {
     }
 
     if(process.env.NODE_ENV !== 'production') {
-      const warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action, unexpectedKeyCache);
-      if(warningMessage) {
+      const warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action, nonReducerKeysCache);
+      if(ignoreNonReducerKeys && warningMessage) {
         console.error(warningMessage)
       }
     }
@@ -159,6 +161,17 @@ export default (reducers: ReducersMapObject) => {
       nextState[key] = nextStateForKey;
       hasChanged = hasChanged || nextStateForKey !== previousStateForKey
     }
-    return hasChanged ? nextState : state
+    if(hasChanged) {
+      const nonReducerKeys = Object.keys(nonReducerKeysCache);
+      if(!ignoreNonReducerKeys && nonReducerKeys.length > 0) {
+        nonReducerKeys.reduce((acc, key) => {
+          acc[key] = state[key];
+          return acc;
+        }, nextState);
+      }
+      return nextState;
+    } else {
+      return state;
+    }
   }
 }

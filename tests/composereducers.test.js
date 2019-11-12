@@ -1,7 +1,8 @@
 import { composeReducers } from "../src/index";
 
 const actions = {
-  ADD: 'ADD'
+  ADD: 'ADD',
+  SUBTRACT: 'SUBTRACT',
 };
 
 const reducer1 = (state = {}, action) => {
@@ -45,7 +46,9 @@ describe("composedReducer tests", () => {
     reducer1,
     reducer2,
     reducer3
-  ], { four: 4 });
+  ], {
+    four: 4
+  });
 
   it("Should return default value", () => expect(composedReducer()).toEqual({ four: 4 }));
 
@@ -57,4 +60,26 @@ describe("composedReducer tests", () => {
     two: 2,
     three: 3
   }));
+
+  it("Should return unchanged state from composed reducer", () => {
+    const initialState = {
+      four: 4
+    };
+    const finalState = composedReducer({
+      four: 4
+    }, {
+      type: actions.SUBTRACT,
+    });
+    expect(finalState).toEqual(initialState);
+  });
+
+  it("Should return exact state object from composed reducer(identity test)", () => {
+    const initialState = {
+      four: 4
+    };
+    const finalState = composedReducer(initialState, {
+      type: actions.SUBTRACT,
+    });
+    expect(finalState === initialState).toEqual(true);
+  });
 });

@@ -29,7 +29,7 @@ const actions = {
   ADD: 'ADD'
 };
 
-const reducer1 = (state = {}, action) => {
+const reducer1 = (state = {}, action, extraData) => {
   switch (action.type) {
     case actions.ADD:
       return {
@@ -41,7 +41,7 @@ const reducer1 = (state = {}, action) => {
   }
 };
 
-const reducer2 = (state = {}, action) => {
+const reducer2 = (state = {}, action, extraData) => {
   switch (action.type) {
     case actions.ADD:
       return {
@@ -64,12 +64,75 @@ let results = composedReducer({
     four: 4
 }, {
     type: actions.ADD,
-});
+}, { three: 3 });
 //results will be
 // {
-//     four: 4,
+//   four: 4,
+//   one: 1,
+//   two: 2
+// }
+```
+
+### combineReducers(reducerMap, options)
+
+The same implementation of the redux [`combineReducers`](https://redux.js.org/api/combinereducers) with 2 changes
+
+1. If more arguments are passed to the combined reducer after `state` and `action`, these parameters will be passed on to all the individual reducers
+2. `options.ignoreNonReducerKeys`: The redux `combineReducers` will ignore keys in the input state that do not have a corresponding reducer in the `reducerMap`. The behavior can be controlled with this option. If `true`, it will behave exactly like the redux `combineReducers`. If `false`(default), it will evaluate keys that have reducers and copy over keys(from the input state) that do not have a reducer associated with it
+
+#### Example
+
+```JavaScript
+import combineReducers from "../src/combinereducers";
+
+const actions = {
+  ADD: 'ADD'
+};
+
+const reducer1 = (state = {}, action, extraData = { one: "one" }) => {
+  switch (action.type) {
+    case actions.ADD:
+      return {
+        ...state,
+        one: extraData.one
+      };
+    default:
+      return state;
+  }
+};
+
+const reducer2 = (state = {}, action, extraData = { two: "two" }, moreData = "three") => {
+  switch (action.type) {
+    case actions.ADD:
+      return {
+        ...state,
+        two: extraData.two,
+        three: moreData
+      };
+    default:
+      return state;
+  }
+};
+
+let combinedReducer = combineReducers({
+  reducer1,
+  reducer2,
+});
+
+let results = combinedReducer({
+    four: 4
+}, {
+    type: actions.ADD,
+}, {
+  one: 1,
+  two: 2
+}, 3);
+//results will be
+// {
 //     one: 1,
-//     two: 2
+//     two: 2,
+//     three: 3,
+//     four: 4
 // }
 ```
 
