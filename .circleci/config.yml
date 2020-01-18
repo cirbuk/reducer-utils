@@ -24,9 +24,14 @@ jobs:
       - run:
           name: Installing packages
           command: yarn install
+
       - run:
           name: Run tests
           command: npm test
+
+      - run:
+          name: Run production tests
+          command: NODE_ENV=production npm test
 
       - save_cache:
           paths:

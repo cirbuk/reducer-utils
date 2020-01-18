@@ -16,7 +16,7 @@ const getUndefinedStateErrorMessage = (key: string, action: AnyAction) => {
   )
 };
 
-const getUnexpectedStateShapeWarningMessage = (inputState: any, reducers: ReducersMapObject, action: AnyAction, nonReducerKeysCache: NonReducerKeysCache) => {
+const getUnexpectedStateShapeWarningMessage = (inputState: any, reducers: ReducersMapObject, action: AnyAction, nonReducerKeys: string[]) => {
   const reducerKeys = Object.keys(reducers);
   const argumentName = action && action.type === ActionTypes.INIT ?
     'preloadedState argument passed to createStore' :
@@ -38,15 +38,6 @@ const getUnexpectedStateShapeWarningMessage = (inputState: any, reducers: Reduce
       `keys: "${reducerKeys.join('", "')}"`
     )
   }
-
-  const nonReducerKeys = Object.keys(inputState).filter(key =>
-    !reducers.hasOwnProperty(key) &&
-    !nonReducerKeysCache[key]
-  );
-
-  nonReducerKeys.forEach(key => {
-    nonReducerKeysCache[key] = true
-  });
 
   if(nonReducerKeys.length > 0) {
     return (
@@ -123,11 +114,6 @@ export default (reducers: ReducersMapObject, {
   }
   const finalReducerKeys = Object.keys(finalReducers);
 
-  let nonReducerKeysCache: NonReducerKeysCache;
-  if(process.env.NODE_ENV !== 'production') {
-    nonReducerKeysCache = {}
-  }
-
   let shapeAssertionError: Error;
   try {
     assertReducerShape(finalReducers)
@@ -140,8 +126,18 @@ export default (reducers: ReducersMapObject, {
       throw shapeAssertionError
     }
 
+    let nonReducerKeysCache: NonReducerKeysCache = {};
+    const nonReducerKeys = Object.keys(state).filter(key =>
+      !reducers.hasOwnProperty(key) &&
+      !nonReducerKeysCache[key]
+    );
+
+    nonReducerKeys.forEach(key => {
+      nonReducerKeysCache[key] = true
+    });
+
     if(process.env.NODE_ENV !== 'production') {
-      const warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action, nonReducerKeysCache);
+      const warningMessage = getUnexpectedStateShapeWarningMessage(state, finalReducers, action, nonReducerKeys);
       if(ignoreNonReducerKeys && warningMessage) {
         console.error(warningMessage)
       }
