@@ -108,7 +108,8 @@ export const patchState = (
       path: options
     } as PatchStateOptions;
   }
-  const { path = '', at: insertAt } = options as PatchStateOptions;
+  let { path = '', at: insertAt } = options as PatchStateOptions;
+  path = `${path}`;
   if(isUndefined(patch)) {
     return state;
   } else if(isNull(path) || path.length === 0) {

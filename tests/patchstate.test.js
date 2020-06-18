@@ -354,3 +354,23 @@ describe("Path creation tests", () => {
     });
   });
 });
+
+describe("Issue tests", () => {
+  it("Should convert number path to string", () => {
+    const newState = patchState({}, {
+      features: {
+        stickerColor: true
+      }
+    }, {
+      path: 123,
+      at: undefined
+    });
+    expect(newState).toEqual({
+      "123": {
+        features: {
+          stickerColor: true
+        }
+      }
+    });
+  });
+});
